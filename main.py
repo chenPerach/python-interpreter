@@ -23,7 +23,7 @@ class Interpeter:
     def error(self):
         raise Exception("Error parsing input")
 
-    def integer(self):
+    def parse_integer(self):
         """
         parse integer number that appers in text
         """
@@ -50,7 +50,7 @@ class Interpeter:
             return Token(EOF, None)
 
         if text[self.pos].isdigit():
-            number = self.integer()
+            number = self.parse_integer()
             t = Token(INTEGER, int(number))
             return t
 
