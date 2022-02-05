@@ -90,21 +90,25 @@ class Interpeter:
 
         left = self.current_token
         self.eat(INTEGER)
+        while True:
+            op = self.current_token
+            if op.type == EOF: 
+                break
+            self.eat(op.type)
+            # if op.type == PLUS:
+            #     self.eat(PLUS)
+            # elif op.type == MINUS:
+            #     self.eat(MINUS)
+            # elif op.type == MUL:
+            #     self.eat(MUL)
+            # elif op.type == DIV: 
+            #     self.eat(DIV)
+            
+            right = self.current_token
+            self.eat(INTEGER)
 
-        op = self.current_token
-        if op.type == PLUS:
-            self.eat(PLUS)
-        elif op.type == MINUS:
-            self.eat(MINUS)
-        elif op.type == MUL:
-            self.eat(MUL)
-        elif op.type == DIV: 
-            self.eat(DIV)
-        
-        right = self.current_token
-        self.eat(INTEGER)
-
-        return OPS[op.type](left.value,right.value)
+            left = Token(INTEGER, OPS[op.type](left.value,right.value))
+        return left.value
 
 def test_spaces():
     assert Interpeter('5 +   4').expr() == 9
