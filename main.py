@@ -23,24 +23,34 @@ class Interpeter:
     def error(self):
         raise Exception("Error parsing input")
 
+    def integer(self):
+        """
+        parse integer number that appers in text
+        """
+        number = ""
+        while self.pos < len(self.text) and self.text[self.pos].isdigit():
+            number += self.text[self.pos]
+            self.pos += 1
+        return number
+    
+    def skip_white_space(self):
+        while self.pos < len(self.text) and self.text[self.pos].isspace():
+            self.pos += 1
+
     def get_next_token(self):
         """
         returns the next token in the text
         """
         text = self.text
 
-        while self.pos <= len(text)-1 and text[self.pos] == ' ':
-            self.pos += 1
+        self.skip_white_space()
 
         if self.pos > len(text)-1:
             self.pos += 1
             return Token(EOF, None)
 
         if text[self.pos].isdigit():
-            number = ""
-            while self.pos <= len(text)-1 and text[self.pos].isdigit():
-                number += text[self.pos]
-                self.pos += 1
+            number = self.integer()
             t = Token(INTEGER, int(number))
             return t
 
@@ -51,6 +61,7 @@ class Interpeter:
         if text[self.pos] == '+':
             self.pos += 1
             return Token(PLUS, '+')
+
         self.error()
 
     def eat(self, token_type):
@@ -67,7 +78,10 @@ class Interpeter:
         self.eat(INTEGER)
 
         op = self.current_token
-        self.current_token = self.get_next_token()
+        if op.type == PLUS:
+            self.eat(PLUS)
+        else:
+            self.eat(MINUS)
 
         right = self.current_token
         self.eat(INTEGER)
@@ -79,7 +93,7 @@ class Interpeter:
 
 
 def test_spaces():
-    assert Interpeter('5 + 4').expr() == 9
+    assert Interpeter('5 +   4').expr() == 9
     assert Interpeter('5 +4 ').expr() == 9
     assert Interpeter(' 5+ 4 ').expr() == 9
 
