@@ -1,4 +1,7 @@
 
+from sys import exec_prefix
+
+
 INTEGER, PLUS, EOF = 'INTEGER', 'PLUS', 'EOF'
 
 class Token:
@@ -28,8 +31,9 @@ class Interpeter:
             return Token(EOF,None)
 
         if text[self.pos].isdigit():
+            t = Token(INTEGER,int(text[self.pos]))
             self.pos += 1
-            return Token(INTEGER,int(text[self.pos]))
+            return t
         
         if text[self.pos] == '+':
             self.pos += 1
@@ -41,6 +45,8 @@ class Interpeter:
             self.current_token = self.get_next_token()
         else:
             self.error()
+
+    
     def expr(self):
 
         self.current_token = self.get_next_token()
@@ -60,6 +66,16 @@ class Interpeter:
 
 
 def main():
-    pass
+    while True:
+        try:
+            text = input(">>>")
+        except EOFError:
+            break
+
+        if not text:
+            continue
+        interpeter = Interpeter(text)
+        res = interpeter.expr()
+        print(res)
 if __name__ == "__main__":
     main()
