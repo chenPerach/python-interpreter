@@ -2,8 +2,13 @@
 from sys import exec_prefix
 
 
-INTEGER, PLUS, MINUS, EOF = 'INTEGER', 'PLUS', 'MINUS', 'EOF'
-
+INTEGER, PLUS, MINUS,MUL,DIV, EOF = 'INTEGER', 'PLUS', 'MINUS','MUL','DIV', 'EOF'
+OPS = {
+    PLUS: lambda x,y:x+y,
+    MINUS: lambda x,y:x-y,
+    MUL: lambda x,y:x*y,
+    DIV: lambda x,y:x//y,
+}
 
 class Token:
     def __init__(self, type, value) -> None:
@@ -62,6 +67,15 @@ class Interpeter:
             self.pos += 1
             return Token(PLUS, '+')
 
+        
+        if text[self.pos] == '*':
+            self.pos += 1
+            return Token(MUL, '*')
+            
+        if text[self.pos] == '/':
+            self.pos += 1
+            return Token(DIV, '/s')
+
         self.error()
 
     def eat(self, token_type):
@@ -80,17 +94,17 @@ class Interpeter:
         op = self.current_token
         if op.type == PLUS:
             self.eat(PLUS)
-        else:
+        elif op.type == MINUS:
             self.eat(MINUS)
-
+        elif op.type == MUL:
+            self.eat(MUL)
+        elif op.type == DIV: 
+            self.eat(DIV)
+        
         right = self.current_token
         self.eat(INTEGER)
-        if op.type == PLUS:
-            return left.value + right.value
 
-        if op.type == MINUS:
-            return left.value - right.value
-
+        return OPS[op.type](left.value,right.value)
 
 def test_spaces():
     assert Interpeter('5 +   4').expr() == 9
@@ -102,8 +116,11 @@ def test_long_numbers():
     assert Interpeter('55 + 4').expr() == 59
 
 
-def test_minus():
+def test_arithmatics():
+    assert Interpeter('55 + 4').expr() == 59
     assert Interpeter('55 - 4').expr() == 51
+    assert Interpeter('55 * 4').expr() == 220
+    assert Interpeter('40 / 4').expr() == 10
 
 
 def main():
