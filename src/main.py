@@ -1,4 +1,4 @@
-from src.interpreter import *
+from src.interpreter.interpreter import *
 
 def test_spaces():
     assert Interpreter('5 +   4').expr() == 9

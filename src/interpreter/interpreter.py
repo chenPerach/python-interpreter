@@ -1,4 +1,4 @@
-from src.Tokenizer.tokenizer import *
+from src.tokenizer.tokenizer import *
 OPS = {
     PLUS: lambda x, y: x+y,
     MINUS: lambda x, y: x-y,
