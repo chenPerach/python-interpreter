@@ -123,10 +123,9 @@ def test_long_numbers():
 
 
 def test_arithmatics():
-    assert Interpreter('55 + 4').expr() == 59
-    assert Interpreter('55 - 4').expr() == 51
-    assert Interpreter('55 * 4').expr() == 220
     assert Interpreter('40 / 4').expr() == 10
+    assert Interpreter('40 / 4+  55 * 4-55 - 4').expr() == 10+220-59
+    assert Interpreter('30 * 1 - 55 * 0').expr() == 30
 
 
 def main():
