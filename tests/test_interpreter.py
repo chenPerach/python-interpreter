@@ -11,7 +11,7 @@ def test_add():
     assert Interpreter('0+6').expr() == 6
     
 def test_sub():
-    assert Interpreter('5-0').expr() == 1
+    assert Interpreter('5-0').expr() == 5
     assert Interpreter('5-6').expr() == -1
     assert Interpreter('2-6').expr() == -4
     assert Interpreter('0-6').expr() == -6
@@ -21,6 +21,9 @@ def test_long_numbers():
     assert Interpreter('55 + 53426').expr() == 53481
     assert Interpreter('53426+55').expr() == 53481
 
+def test_brackets():
+    assert Interpreter("5+7*5").expr() == 40
+    assert Interpreter("(5+7)*5").expr() == 60
 
 def test_arithmatics():
     assert Interpreter('40 / 4').expr() == 10

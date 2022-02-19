@@ -10,28 +10,28 @@ class Interpreter:
         self.tokenizer = Tokenizer(text)
         self.current_token: Token = self.tokenizer.get_next_token()
 
-    def error(self):
-        raise Exception("Invalid Syntax")
-
-
 
     def skip_white_space(self):
         while self.pos < len(self.text) and self.text[self.pos].isspace():
             self.pos += 1
 
-
-
     def eat(self, token_type):
         if self.current_token.type == token_type:
             self.current_token = self.tokenizer.get_next_token()
         else:
-            self.error()
-
+            raise Exception("Invalid Syntax")
+    
     def factor(self):
         """factor : INTEGER"""
         token = self.current_token
-        self.eat(INTEGER)
-        return token
+        if token.type == INTEGER:
+            self.eat(INTEGER)
+            return token
+        elif token.type == LBRACKET:
+            self.eat(LBRACKET)
+            result = self.expr()
+            self.eat(RBRACKET)
+            return Token(INTEGER,result)
 
     def term(self):
         """term : factor((DIV|MUL)factor)*"""
