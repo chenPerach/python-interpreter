@@ -1,14 +1,16 @@
 
+from ast import Mult
 from sys import exec_prefix
 
 
-INTEGER, PLUS, MINUS,MUL,DIV, EOF = 'INTEGER', 'PLUS', 'MINUS','MUL','DIV', 'EOF'
+INTEGER, PLUS, MINUS, MUL, DIV, EOF = 'INTEGER', 'PLUS', 'MINUS', 'MUL', 'DIV', 'EOF'
 OPS = {
-    PLUS: lambda x,y:x+y,
-    MINUS: lambda x,y:x-y,
-    MUL: lambda x,y:x*y,
-    DIV: lambda x,y:x//y,
+    PLUS: lambda x, y: x+y,
+    MINUS: lambda x, y: x-y,
+    MUL: lambda x, y: x*y,
+    DIV: lambda x, y: x//y,
 }
+
 
 class Token:
     def __init__(self, type, value) -> None:
@@ -19,14 +21,14 @@ class Token:
         return f"Token({self.type},{self.value})"
 
 
-class Interpeter:
+class Interpreter:
     def __init__(self, text: str) -> None:
         self.text: str = text
         self.pos = 0
-        self.current_token: Token = None
+        self.current_token: Token = self.get_next_token()
 
     def error(self):
-        raise Exception("Error parsing input")
+        raise Exception("Invalid Syntax")
 
     def parse_integer(self):
         """
@@ -37,7 +39,7 @@ class Interpeter:
             number += self.text[self.pos]
             self.pos += 1
         return number
-    
+
     def skip_white_space(self):
         while self.pos < len(self.text) and self.text[self.pos].isspace():
             self.pos += 1
@@ -51,7 +53,6 @@ class Interpeter:
         self.skip_white_space()
 
         if self.pos > len(text)-1:
-            self.pos += 1
             return Token(EOF, None)
 
         if text[self.pos].isdigit():
@@ -67,14 +68,13 @@ class Interpeter:
             self.pos += 1
             return Token(PLUS, '+')
 
-        
         if text[self.pos] == '*':
             self.pos += 1
             return Token(MUL, '*')
-            
+
         if text[self.pos] == '/':
             self.pos += 1
-            return Token(DIV, '/s')
+            return Token(DIV, '/')
 
         self.error()
 
@@ -83,61 +83,63 @@ class Interpeter:
             self.current_token = self.get_next_token()
         else:
             self.error()
-
-    def expr(self):
-
-        self.current_token = self.get_next_token()
-
-        left = self.current_token
+    def factor(self):
+        token = self.current_token
         self.eat(INTEGER)
-        while True:
-            op = self.current_token
-            if op.type == EOF: 
-                break
-            self.eat(op.type)
-            # if op.type == PLUS:
-            #     self.eat(PLUS)
-            # elif op.type == MINUS:
-            #     self.eat(MINUS)
-            # elif op.type == MUL:
-            #     self.eat(MUL)
-            # elif op.type == DIV: 
-            #     self.eat(DIV)
-            
-            right = self.current_token
-            self.eat(INTEGER)
+        return token
+    def div_mul(self):
+        result = self.factor()
 
-            left = Token(INTEGER, OPS[op.type](left.value,right.value))
-        return left.value
+        while self.current_token.type in (MUL,DIV):
+            op = self.current_token
+            self.eat(op.type)
+            right = self.factor()
+
+            result = Token(INTEGER, OPS[op.type](result.value, right.value))
+        return result
+        
+    def expr(self):
+        # self.current_token = self.get_next_token()
+        result = self.div_mul()
+
+        while self.current_token.type in (PLUS,MINUS):
+            op = self.current_token
+            self.eat(op.type)
+            right = self.div_mul()
+
+            result = Token(INTEGER, OPS[op.type](result.value, right.value))
+        
+        return result.value
+
 
 def test_spaces():
-    assert Interpeter('5 +   4').expr() == 9
-    assert Interpeter('5 +4 ').expr() == 9
-    assert Interpeter(' 5+ 4 ').expr() == 9
+    assert Interpreter('5 +   4').expr() == 9
+    assert Interpreter('5 +4 ').expr() == 9
+    assert Interpreter(' 5+ 4 ').expr() == 9
 
 
 def test_long_numbers():
-    assert Interpeter('55 + 4').expr() == 59
+    assert Interpreter('55 + 4').expr() == 59
 
 
 def test_arithmatics():
-    assert Interpeter('55 + 4').expr() == 59
-    assert Interpeter('55 - 4').expr() == 51
-    assert Interpeter('55 * 4').expr() == 220
-    assert Interpeter('40 / 4').expr() == 10
+    assert Interpreter('55 + 4').expr() == 59
+    assert Interpreter('55 - 4').expr() == 51
+    assert Interpreter('55 * 4').expr() == 220
+    assert Interpreter('40 / 4').expr() == 10
 
 
 def main():
     while True:
         try:
-            text = input(">>>")
+            text = input(">>> ")
         except EOFError:
             break
         if text == 'q':
             break
         if not text:
             continue
-        interpeter = Interpeter(text)
+        interpeter = Interpreter(text)
         res = interpeter.expr()
         print(res)
 
